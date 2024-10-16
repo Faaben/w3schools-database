@@ -1,8 +1,6 @@
 # W3Schools Database in Docker
 
 Forked from https://github.com/AndrejPHP/w3schools-database for academic purposes.
-
-
 This repository provides:
 
 - a docker compose which sets up the DB on port 3309 (non-default, no clashes)
