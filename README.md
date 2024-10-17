@@ -20,6 +20,7 @@ code .
 ```
 
 ## How to Run the database, rest-api and react app. The Browser will open on http://localhost:3001
+
 ```
 ./start-app.bat
 ```
@@ -32,6 +33,7 @@ docker-compose stop  # Stoppe die Container ohne sie zu entfernen
 ## How to start again 
 ```
 docker-compose start  #Startet die Container wieder
+```
 
 ## How to delete the Container, the network and all volumes
 ```
