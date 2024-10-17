@@ -21,7 +21,9 @@ code .
 
 Run the database and rest-api
 ```
-sudo docker-compose up
+./start-app.bat
+
+#sudo docker-compose up
 ```
 
 Start the react app like this
