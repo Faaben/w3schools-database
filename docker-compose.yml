@@ -26,11 +26,10 @@ services:
       - DB_HOST=w3schools-db
       - DB_PORT=3306
 
-  # react-app:
-  #   build: ./my-app
-  #   restart: always
-  #   ports:
-  #     - 3001:3000
-  #   environment:
-  #     - REACT_APP_API_URL=http://localhost:3000
-
+  react-app:
+    build: ./my-app  # Pfad zum Dockerfile deiner React-App
+    restart: always
+    ports:
+      - 3001:3000  # Mappe Port 3001 des Hosts auf Port 3000 des Containers
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000  # API-URL für die React-App
