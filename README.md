@@ -9,7 +9,7 @@ This repository provides:
 
 ## Fork to your github account
 Go to github.com, create a new account or login.
-Fork my repo (https://github.com/yveseinfeldt/w3schools-database)
+Fork my repo (https://github.com/Faaben/w3schools-database)
 
 Now you have a repository w3schools-database in your github account.
 Clone that with
@@ -19,28 +19,25 @@ cd w3schools-database
 code .
 ```
 
-Run the database and rest-api
+## How to Run the database, rest-api and react app. The Browser will open on http://localhost:3001
 ```
 ./start-app.bat
-
-#sudo docker-compose up
 ```
 
-Start the react app like this
+## How to stop 
 ```
-cd my-app
-npm start
+docker-compose stop  # Stoppe die Container ohne sie zu entfernen
 ```
 
-## How to reset?
-
-Execute:
-
-```bash
-docker compose down
-rm -rf data
-docker compose up -d
+## How to start again 
 ```
+docker-compose start  #Startet die Container wieder
+
+## How to delete the Container, the network and all volumes
+```
+docker-compose down --volumes  # Stoppe und entferne alle Container, Netzwerke und Volumes
+```
+
 
 ## Tables
 
