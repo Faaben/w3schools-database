@@ -14,7 +14,7 @@ Fork my repo (https://github.com/yveseinfeldt/w3schools-database)
 Now you have a repository w3schools-database in your github account.
 Clone that with
 ```
-git clone https://github.com/YOURUSERNAME/w3schools-database
+git clone https://github.com/Faaben/w3schools-database
 cd w3schools-database
 code .
 ```
