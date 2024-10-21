@@ -27,12 +27,12 @@ code .
 
 ## How to stop 
 ```
-docker-compose stop  # Stoppe die Container ohne sie zu entfernen
+docker-compose stop  # Stoppe die Container ohne sie zu entfernen.
 ```
 
 ## How to start again 
 ```
-docker-compose start  #Startet die Container wieder
+docker-compose start  #Startet die Container erneut. 
 ```
 
 ## How to delete the Container, the network and all volumes

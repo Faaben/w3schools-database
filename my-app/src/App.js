@@ -1,7 +1,43 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';  // React Router importieren
+import CategoryList from './CategoryList';  // Kategorien-Komponente
+import CustomerList from './CustomerList';  // Kunden-Komponente importieren
 
 const api = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import CategoryList from './CategoryList';
+import CustomerList from './CustomerList';
+
+function NavBar() {
+  return (
+    <nav>
+      <ul>
+        <li>
+          <Link to="/">Categories</Link>
+        </li>
+        <li>
+          <Link to="/customers">Customers</Link>
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <NavBar />
+      <div className="container mx-auto p-4">
+        <Routes>
+          <Route path="/" element={<CategoryList />} />
+          <Route path="/customers" element={<CustomerList />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
 
 function CategoryList() {
   const [categories, setCategories] = useState([]);
@@ -205,4 +241,4 @@ function CategoryList() {
   );
 }
 
-export default CategoryList;
+export default App;
