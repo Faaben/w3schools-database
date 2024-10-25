@@ -40,6 +40,11 @@ docker-compose start  #Startet die Container erneut.
 docker-compose down --volumes  # Stoppe und entferne alle Container, Netzwerke und Volumes
 ```
 
+## How to end the wsl on your System
+```
+wsl --shutdown
+```
+
 
 ## Tables
 
