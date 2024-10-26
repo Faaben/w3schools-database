@@ -13,9 +13,6 @@ function App() {
 }
 
 
-
-
-
 function ProductList() {
   const [products, setProducts] = useState([]);
   const [editableProductId, setEditableProductId] = useState(null);
@@ -24,7 +21,8 @@ function ProductList() {
   const [searchTerm, setSearchTerm] = useState(''); // Suchbegriff
   const productsPerPage = 10; // Anzahl der Zeilen pro Seite
 
-  const resizerRef = useRef(null); // Referenz für das Resizer-Element
+  const productRef = useRef();
+  const priceRef = useRef();
 
   useEffect(() => {
     fetch(`${api}/products`)
@@ -43,23 +41,36 @@ function ProductList() {
   };
 
   const handleSave = (productId) => {
-    const updatedProduct = editedProduct[productId];
-    fetch(`${api}/products/${productId}`, {
-      method: 'PATCH',
+    // Erstelle das updatedProduct mit konvertiertem Preis
+    const updatedProduct = {
+      ...editedProduct[productId],
+      Price: parseFloat(editedProduct[productId]?.Price) || 0 // Standardwert 0, falls das Feld leer ist
+    };
+    // Setze die Methode und URL basierend auf productId (neu oder bestehend)
+    const method = productId === 'new' ? 'POST' : 'PATCH';
+    const url = productId === 'new' ? `${api}/products` : `${api}/products/${productId}`;
+
+    fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updatedProduct),
     })
-      .then(response => {
-        if (response.ok) {
+      .then(response => response.json())
+      .then(data => {
+        // Füge das neue Produkt hinzu oder aktualisiere das bestehende
+        if (productId === 'new') {
+          setProducts([...products, data]);
+        } else {
           setProducts(products.map(product =>
             product.ProductID === productId ? { ...product, ...updatedProduct } : product
           ));
-          setEditableProductId(null);
-        } else {
-          alert('Failed to update product');
         }
+        // Setze editierbaren Zustand zurück und leere das Formular        
+        setEditableProductId(null);
+        setEditedProduct({});
+        window.location.reload(); // Seite neu laden, um die Änderungen anzuzeigen
       });
   };
 
@@ -78,7 +89,7 @@ function ProductList() {
 
   // Filterfunktion basierend auf dem Suchbegriff
   const filteredProducts = products.filter(product =>
-    product.ProductName.toLowerCase().includes(searchTerm.toLowerCase())
+    product.ProductName && product.ProductName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination Logik
@@ -100,14 +111,13 @@ function ProductList() {
     }
   };
 
-  // Funktionen zum Anpassen der Spaltenbreite
-  const onMouseDown = (e, column) => {
+  const onMouseDown = (e, columnRef) => {
     const startX = e.pageX;
-    const startWidth = column.current.offsetWidth;
+    const startWidth = columnRef.current.offsetWidth;
 
     const onMouseMove = (e) => {
       const newWidth = startWidth + e.pageX - startX;
-      column.current.style.width = `${newWidth}px`;
+      columnRef.current.style.width = `${newWidth}px`;
     };
 
     const onMouseUp = () => {
@@ -123,6 +133,9 @@ function ProductList() {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Produkte</h1>
   
+  
+      {/* Flexbox für Button und Suchfeld */}
+
       {/* Flexbox für Button und Suchfeld */}
       <div className="flex items-center space-x-4 mb-4">
         {/* Add New Product Button */}
@@ -140,14 +153,99 @@ function ProductList() {
           placeholder="Suchen"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '7cm' }}  // Manuelle Breitenanpassung
+          style={{ width: '7cm' }}
         />
       </div>
 
       {editableProductId === 'new' && (
         <div className="mb-4 p-4 border rounded">
-          {/* Product Inputs for new product */}
-          {/* ... */}
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Produktname"
+            value={editedProduct['new']?.ProductName || ''}
+            onChange={(e) => handleInputChange('new', 'ProductName', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="number"
+            placeholder="Preis"
+            value={editedProduct['new']?.Price || ''}
+            onChange={(e) => handleInputChange('new', 'Price', parseFloat(e.target.value))}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="number"
+            placeholder="Lieferant ID (SupplierID)"
+            value={editedProduct['new']?.SupplierID || ''}
+            onChange={(e) => handleInputChange('new', 'SupplierID', parseInt(e.target.value))}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="number"
+            placeholder="Kategorie ID (CategoryID)"
+            value={editedProduct['new']?.CategoryID || ''}
+            onChange={(e) => handleInputChange('new', 'CategoryID', parseInt(e.target.value))}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Einheit (Stück, Liter...)"
+            value={editedProduct['new']?.Unit || ''}
+            onChange={(e) => handleInputChange('new', 'Unit', e.target.value)}
+          />
+          <div className="flex space-x-2">
+          <button
+  className="bg-green-500 text-white px-4 py-2 rounded"
+  onClick={() => {
+    const newProduct = {
+      ProductName: editedProduct['new']?.ProductName || '',
+      Price: editedProduct['new']?.Price || 0,
+      SupplierID: editedProduct['new']?.SupplierID || null,
+      CategoryID: editedProduct['new']?.CategoryID || null,
+      Unit: editedProduct['new']?.Unit || ''
+    };
+
+    // Überprüfen, ob das Produkt mindestens einen Namen hat
+    if (!newProduct.ProductName) {
+      alert("Bitte geben Sie einen Produktnamen ein.");
+      return;
+    }
+
+    fetch(`${api}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newProduct),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Fehler beim Speichern des Produkts");
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Füge das neu erstellte Produkt zur lokalen Liste hinzu
+        setProducts([...products, data]);
+        setEditableProductId(null);
+        setEditedProduct({});
+        window.location.reload(); // Seite neu laden
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  }}
+>
+  Save
+</button>
+            <button 
+              className="bg-red-500 text-white px-4 py-2 rounded"
+              onClick={() => setEditableProductId(null)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
@@ -155,20 +253,17 @@ function ProductList() {
       <table className="min-w-full bg-white border">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b text-left">
+            <th className="py-2 px-4 border-b text-left resizable-th" ref={productRef}>
               Produktname
               <div
-                className="resizer"
-                onMouseDown={(e) => onMouseDown(e, resizerRef)}
-                style={{ cursor: 'col-resize' }}
+                className="resizer-line"
+                onMouseDown={(e) => onMouseDown(e, productRef)}
               ></div>
             </th>
-            <th className="py-2 px-4 border-b text-left">
+            <th className="py-2 px-4 border-b text-left resizable-th" ref={priceRef}>
               Preis
               <div
-                className="resizer"
-                onMouseDown={(e) => onMouseDown(e, resizerRef)}
-                style={{ cursor: 'col-resize' }}
+                className="resizer-line"
               ></div>
             </th>
             <th className="py-2 px-4 border-b w-36">Bearbeiten</th>
@@ -177,7 +272,7 @@ function ProductList() {
         <tbody>
           {currentProducts.map(product => (
             <tr key={product.ProductID} className="hover:bg-gray-100">
-              <td className="py-2 px-4 border-b">
+              <td className="py-2 px-4 border-b resizable-td" ref={productRef}>
                 {editableProductId === product.ProductID ? (
                   <input
                     className="border p-2 w-full"
@@ -190,20 +285,27 @@ function ProductList() {
                 ) : (
                   product.ProductName
                 )}
+                <div
+                   className="resizer-line"
+                   onMouseDown={(e) => onMouseDown(e, productRef)}
+                ></div>
               </td>
-              <td className="py-2 px-4 border-b">
+              <td className="py-2 px-4 border-b resizable-td" ref={priceRef}>
                 {editableProductId === product.ProductID ? (
                   <input
                     className="border p-2 w-full"
-                    type="number"
-                    value={editedProduct[product.ProductID]?.Price || product.Price}
-                    onChange={(e) =>
-                      handleInputChange(product.ProductID, 'Price', parseFloat(e.target.value))
+                    type="text" // Verwende "text" statt "number" für flexibles Editieren
+                    placeholder="Preis"
+                    value={editedProduct[product.ProductID]?.Price || ''}
+                    onChange={(e) => handleInputChange(product.ProductID, 'Price', e.target.value)
                     }
                   />
                 ) : (
                   product.Price
                 )}
+                <div
+                   className="resizer-line"
+                ></div>
               </td>
               <td className="py-2 px-4 border-b">
                 {editableProductId === product.ProductID ? (
@@ -272,6 +374,7 @@ function ProductList() {
     </div>
   );
 }
+
 
 
 

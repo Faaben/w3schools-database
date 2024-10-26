@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.resizer-line {
+    width: 4px;
+    height: 100%;
+    background-color: gray;
+    cursor: col-resize;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translateX(50%);
+  }
+  
+  th.resizable-th, td.resizable-td {
+    position: relative;
+  }
+  
+  th.resizable-th .resizer-line {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: gray;
+    cursor: col-resize;
+  }
