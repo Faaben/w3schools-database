@@ -7,6 +7,7 @@ function App() {
   return (
     <div className="container mx-auto p-4">
       <ProductList />
+      <SupplierList />
       <CategoryList />
     </div>
   );
@@ -367,6 +368,325 @@ function ProductList() {
           onClick={nextPage}
           className={`px-3 py-1 rounded ${currentPage === Math.ceil(filteredProducts.length / productsPerPage) ? 'bg-gray-300' : 'bg-blue-500 text-white'}`}
           disabled={currentPage === Math.ceil(filteredProducts.length / productsPerPage)}
+        >
+          &rarr;
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+function SupplierList() {
+  const [suppliers, setSuppliers] = useState([]);
+  const [editableSupplierId, setEditableSupplierId] = useState(null);
+  const [editedSupplier, setEditedSupplier] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const suppliersPerPage = 10;
+
+  const supplierNameRef = useRef();
+  const contactNameRef = useRef();
+
+  useEffect(() => {
+    fetch(`${api}/suppliers`)
+      .then(response => response.json())
+      .then(data => setSuppliers(data));
+  }, []);
+
+  const handleInputChange = (supplierId, field, value) => {
+    setEditedSupplier(prev => ({
+      ...prev,
+      [supplierId]: {
+        ...prev[supplierId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSave = (supplierId) => {
+    const updatedSupplier = editedSupplier[supplierId];
+    const method = supplierId === 'new' ? 'POST' : 'PATCH';
+    const url = supplierId === 'new' ? `${api}/suppliers` : `${api}/suppliers/${supplierId}`;
+
+    fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedSupplier),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (supplierId === 'new') {
+          setSuppliers([...suppliers, data]);
+        } else {
+          setSuppliers(suppliers.map(supplier =>
+            supplier.SupplierID === supplierId ? { ...supplier, ...updatedSupplier } : supplier
+          ));
+        }
+        setEditableSupplierId(null);
+        setEditedSupplier({});
+        window.location.reload();
+      });
+  };
+
+  const handleDelete = (supplierId) => {
+    fetch(`${api}/suppliers/${supplierId}`, {
+      method: 'DELETE',
+    })
+      .then(response => {
+        if (response.ok) {
+          setSuppliers(suppliers.filter(supplier => supplier.SupplierID !== supplierId));
+        } else {
+          alert('Failed to delete supplier');
+        }
+      });
+  };
+
+  const filteredSuppliers = suppliers.filter(supplier =>
+    supplier.SupplierName && supplier.SupplierName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastSupplier = currentPage * suppliersPerPage;
+  const indexOfFirstSupplier = indexOfLastSupplier - suppliersPerPage;
+  const currentSuppliers = filteredSuppliers.slice(indexOfFirstSupplier, indexOfLastSupplier);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredSuppliers.length / suppliersPerPage)) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Lieferanten</h1>
+
+      <div className="flex items-center space-x-4 mb-4">
+        <button 
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => setEditableSupplierId('new')}
+        >
+          Neuen Lieferanten hinzufügen
+        </button>
+
+        <input
+          type="text"
+          className="border p-2"
+          placeholder="Suchen"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '7cm' }}
+        />
+      </div>
+
+      {editableSupplierId === 'new' && (
+        <div className="mb-4 p-4 border rounded">
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Lieferantenname"
+            value={editedSupplier['new']?.SupplierName || ''}
+            onChange={(e) => handleInputChange('new', 'SupplierName', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Kontaktname"
+            value={editedSupplier['new']?.ContactName || ''}
+            onChange={(e) => handleInputChange('new', 'ContactName', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Adresse"
+            value={editedSupplier['new']?.Address || ''}
+            onChange={(e) => handleInputChange('new', 'Address', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Stadt"
+            value={editedSupplier['new']?.City || ''}
+            onChange={(e) => handleInputChange('new', 'City', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="PLZ"
+            value={editedSupplier['new']?.PostalCode || ''}
+            onChange={(e) => handleInputChange('new', 'PostalCode', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Land"
+            value={editedSupplier['new']?.Country || ''}
+            onChange={(e) => handleInputChange('new', 'Country', e.target.value)}
+          />
+          <input
+            className="border p-2 mb-2 w-full"
+            type="text"
+            placeholder="Telefonnummer"
+            value={editedSupplier['new']?.Phone || ''}
+            onChange={(e) => handleInputChange('new', 'Phone', e.target.value)}
+          />
+          <div className="flex space-x-2">
+            <button 
+              className="bg-green-500 text-white px-4 py-2 rounded"
+              onClick={() => handleSave('new')}
+            >
+              Speichern
+            </button>
+            <button 
+              className="bg-red-500 text-white px-4 py-2 rounded"
+              onClick={() => setEditableSupplierId(null)}
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      <table className="min-w-full bg-white border">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border-b text-left">Lieferantenname</th>
+            <th className="py-2 px-4 border-b text-left">Kontaktname</th>
+            <th className="py-2 px-4 border-b text-left">Adresse</th>
+            <th className="py-2 px-4 border-b text-left">Telefon</th>
+            <th className="py-2 px-4 border-b w-36">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentSuppliers.map(supplier => (
+            <tr key={supplier.SupplierID} className="hover:bg-gray-100">
+              <td className="py-2 px-4 border-b">
+                {editableSupplierId === supplier.SupplierID ? (
+                  <input
+                    className="border p-2 w-full"
+                    type="text"
+                    value={editedSupplier[supplier.SupplierID]?.SupplierName || supplier.SupplierName}
+                    onChange={(e) =>
+                      handleInputChange(supplier.SupplierID, 'SupplierName', e.target.value)
+                    }
+                  />
+                ) : (
+                  supplier.SupplierName
+                )}
+              </td>
+              <td className="py-2 px-4 border-b">
+                {editableSupplierId === supplier.SupplierID ? (
+                  <input
+                    className="border p-2 w-full"
+                    type="text"
+                    value={editedSupplier[supplier.SupplierID]?.ContactName || supplier.ContactName}
+                    onChange={(e) =>
+                      handleInputChange(supplier.SupplierID, 'ContactName', e.target.value)
+                    }
+                  />
+                ) : (
+                  supplier.ContactName
+                )}
+              </td>
+              <td className="py-2 px-4 border-b">
+                {editableSupplierId === supplier.SupplierID ? (
+                  <input
+                    className="border p-2 w-full"
+                    type="text"
+                    value={editedSupplier[supplier.SupplierID]?.Address || supplier.Address}
+                    onChange={(e) =>
+                      handleInputChange(supplier.SupplierID, 'Address', e.target.value)
+                    }
+                  />
+                ) : (
+                  supplier.Address
+                )}
+              </td>
+              <td className="py-2 px-4 border-b">
+                {editableSupplierId === supplier.SupplierID ? (
+                  <input
+                    className="border p-2 w-full"
+                    type="text"
+                    value={editedSupplier[supplier.SupplierID]?.Phone || supplier.Phone}
+                    onChange={(e) =>
+                      handleInputChange(supplier.SupplierID, 'Phone', e.target.value)
+                    }
+                  />
+                ) : (
+                  supplier.Phone
+                )}
+              </td>
+              <td className="py-2 px-4 border-b">
+                {editableSupplierId === supplier.SupplierID ? (
+                  <div className="flex space-x-2">
+                    <button 
+                      className="bg-green-500 text-white px-4 py-2 rounded"
+                      onClick={() => handleSave(supplier.SupplierID)}
+                    >
+                      Speichern
+                    </button>
+                    <button 
+                      className="bg-red-500 text-white px-4 py-2 rounded"
+                      onClick={() => setEditableSupplierId(null)}
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex space-x-2">
+                    <button 
+                      className="bg-blue-500 text-black px-4 py-2 rounded"
+                      onClick={() => setEditableSupplierId(supplier.SupplierID)}
+                    >
+                      Bearbeiten
+                    </button>
+                    <button 
+                      className="bg-yellow-500 text-black px-4 py-2 rounded"
+                      onClick={() => handleDelete(supplier.SupplierID)}
+                    >
+                      Löschen
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex justify-center mt-4 space-x-2">
+        <button
+          onClick={prevPage}
+          className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'}`}
+          disabled={currentPage === 1}
+        >
+          &larr;
+        </button>
+        {Array.from({ length: Math.ceil(filteredSuppliers.length / suppliersPerPage) }, (_, i) => i + 1).map(pageNumber => (
+          <button
+            key={pageNumber}
+            onClick={() => paginate(pageNumber)}
+            className={`mx-2 px-3 py-1 rounded ${pageNumber === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            {pageNumber}
+          </button>
+        ))}
+        <button
+          onClick={nextPage}
+          className={`px-3 py-1 rounded ${currentPage === Math.ceil(filteredSuppliers.length / suppliersPerPage) ? 'bg-gray-300' : 'bg-blue-500 text-white'}`}
+          disabled={currentPage === Math.ceil(filteredSuppliers.length / suppliersPerPage)}
         >
           &rarr;
         </button>

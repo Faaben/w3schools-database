@@ -62,7 +62,11 @@ When the docker container starts, it creates database named __w3schools__ with t
 and inserts the respective data. 
 
 ## Features
-1. Get and list all categories
+1. Get and list all Products
+1. Get and list all suppliers
+2. Get and list all categories
+2. Create a new product
+2. Create a new supplier
 2. Create a new category
 3. Update an existing category
 4. Delete a category
