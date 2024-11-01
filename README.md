@@ -1,6 +1,6 @@
 # W3Schools Database in Docker
 
-Forked from https://github.com/AndrejPHP/w3schools-database for academic purposes.
+Forked from https://github.com/yveseinfeldt/w3schools-database for academic purposes.
 This repository provides:
 
 - a docker compose which sets up the DB on port 3309 (non-default, no clashes)
@@ -78,6 +78,7 @@ and inserts the respective data.
 14. Searchfield for Products 
 15. Searchfield for suppliers
 16. The pagination logic divides products into pages and handles navigation between them.
+17. Drag and Drop Handler 
 
 
 
